@@ -9,7 +9,7 @@ import java.util.List;
  * Created by chira on 6/22/2017.
  */
 
-public class BookLoader extends AsyncTaskLoader<String> {
+public class BookLoader extends AsyncTaskLoader<List<Book>> {
 
 /** Tag for log messages */
 private static final String LOG_TAG = BookLoader.class.getName();
@@ -37,13 +37,13 @@ protected void onStartLoading() {
  * This is on a background thread.
  */
 @Override
-public String loadInBackground() {
+public List<Book> loadInBackground() {
         if (mUrl == null) {
         return null;
         }
 
         // Perform the network request, parse the response, and extract a list of earthquakes.
-        String earthquakes = QueryUtil.getBookData(mUrl);
+        List<Book> earthquakes = QueryUtil.getBookData(mUrl);
         return earthquakes;
         }
         }

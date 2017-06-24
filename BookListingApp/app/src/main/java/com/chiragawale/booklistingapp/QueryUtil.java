@@ -2,6 +2,10 @@ package com.chiragawale.booklistingapp;
 
 import android.util.Log;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,6 +14,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class QueryUtil {
@@ -22,7 +28,7 @@ public class QueryUtil {
     /*
     Returns the Refined data collected from the server
      */
-    public static String getBookData(String request_url) {
+    public static List<Book> getBookData(String request_url) {
 
         URL url = createUrl(request_url);
         String result = "";
@@ -31,7 +37,9 @@ public class QueryUtil {
         }catch (IOException i){
             Log.e(LOG_TAG,"IO Exception");
         }
-        return result;
+
+        List<Book> bookList = getBookList(result);
+        return bookList;
     }
 
     /*
@@ -110,6 +118,55 @@ public class QueryUtil {
 
         return stringBuilder.toString();
 
+    }
+    //Returns the list of books after extracting data from the JSON response
+    public static List<Book> getBookList(String jsonResponse){
+        List<Book> bookList = new ArrayList<>();
+        double price = 0;
+        String currency = "";
+        double averageRating = 0;
+        try {
+            JSONObject root = new JSONObject(jsonResponse);
+            JSONArray itemsArray = root.getJSONArray("items");
+            for(int i = 0; i < itemsArray.length();i++) {
+                JSONObject currentItem = itemsArray.getJSONObject(i);
+                JSONObject volumeInfo = currentItem.getJSONObject("volumeInfo");
+                String bookName = volumeInfo.getString("title");
+                Log.v(LOG_TAG,bookName);
+
+                JSONArray authorsArray =volumeInfo.getJSONArray("authors");
+                String author = authorsArray.getString(0);
+                Log.v(LOG_TAG,author);
+
+                if(volumeInfo.has("averageRating")) {
+                     averageRating = volumeInfo.getDouble("averageRating");
+                    Log.v(LOG_TAG, "AVERAGE RAING " + averageRating);
+                }
+                JSONObject saleInfo = currentItem.getJSONObject("saleInfo");
+                String saleability = saleInfo.getString("saleability");
+                Log.v(LOG_TAG,saleability);
+
+                if (saleability.equalsIgnoreCase("FOR_SALE")){
+                    JSONObject listPrice = saleInfo.getJSONObject("listPrice");
+                    price = listPrice.getDouble("amount");
+                    currency = listPrice.getString("currencyCode");
+                    Log.v(LOG_TAG,"PRice " + price);
+                    Log.v(LOG_TAG,currency);
+
+                }
+                String infoLink = volumeInfo.getString("infoLink");
+
+                Book book = new Book(bookName,author,infoLink,currency,averageRating,price);
+                bookList.add(book);
+            }
+
+
+
+        } catch (JSONException e) {
+
+            Log.e(LOG_TAG,"JSON EXCEPTION");
+        }
+        return bookList;
     }
 
 }
