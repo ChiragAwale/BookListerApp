@@ -4,13 +4,14 @@ import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Created by chira on 6/22/2017.
  */
 
-public class BookLoader extends AsyncTaskLoader<List<Book>> {
+public class BookLoader extends AsyncTaskLoader<ArrayList<Book>> {
 
     /**
      * Tag for log messages
@@ -35,7 +36,6 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
 
     @Override
     protected void onStartLoading() {
-        Log.i("ON Start", "LOG ");
         forceLoad();
     }
 
@@ -45,14 +45,14 @@ public class BookLoader extends AsyncTaskLoader<List<Book>> {
      * This is on a background thread.
      */
     @Override
-    public List<Book> loadInBackground() {
-        Log.i("ON load in background", "LOG ");
+    public ArrayList<Book> loadInBackground() {
+        Log.w("Load IN background", "``````````````````````````````````````````````````````````");
         if (mUrl == null) {
             return null;
         }
 
         // Perform the network request, parse the response, and extract a list of earthquakes.
-        List<Book> earthquakes = QueryUtil.getBookData(mUrl);
+        ArrayList<Book> earthquakes = QueryUtil.getBookData(mUrl);
         return earthquakes;
     }
 }

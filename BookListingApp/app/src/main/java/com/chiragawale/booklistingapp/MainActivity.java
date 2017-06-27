@@ -25,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
-        implements android.app.LoaderManager.LoaderCallbacks<List<Book>> {
+        implements android.app.LoaderManager.LoaderCallbacks<ArrayList<Book>> {
 
     private static final String BASE_URL = "https://www.googleapis.com/books/v1/volumes?";
     private static final int MAX_NUMBER_OF_RESULTS = 10;
@@ -33,11 +33,16 @@ public class MainActivity extends AppCompatActivity
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressBar;
     private BookAdapter mAdapter;
+    private android.app.LoaderManager loaderManager;
 
-    // boolean mFirst = true;      //For determining the usage of loaders
+    private static final String STATE_COUNTER = "counter";
+
+    private int mCounter;
+
+    Loader loader = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i("ON CREATE", "LOG ");
+        Log.w("OnCreate", "``````````````````````````````````````````````````````````");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -50,7 +55,7 @@ public class MainActivity extends AppCompatActivity
         mProgressBar = (ProgressBar) findViewById(R.id.loading_indicator);
 
 
-        List<Book> bookList = new ArrayList<>();
+        ArrayList<Book> bookList = new ArrayList<>();
         mAdapter = new BookAdapter(this, bookList);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(mAdapter);
@@ -61,6 +66,9 @@ public class MainActivity extends AppCompatActivity
         Setting action for search button
          */
 
+        searchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 // Get a reference to the ConnectivityManager to check state of network connectivity
                 ConnectivityManager connMgr = (ConnectivityManager)
                         getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -70,15 +78,25 @@ public class MainActivity extends AppCompatActivity
 
                 // If there is a network connection, fetch data
                 if (networkInfo != null && networkInfo.isConnected()) {
-
                     // Get a reference to the LoaderManager, in order to interact with loaders.
-                     android.app.LoaderManager loaderManager = getLoaderManager();
+                     loaderManager = getLoaderManager();
 
                     // Initialize the loader. Pass in the int ID constant defined above and pass in null for
                     // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
                     // because this activity implements the LoaderCallbacks interface).
-                    Log.e("init loader calling ", "LOG ");
-                    loaderManager.initLoader(1, null, MainActivity.this);
+                    Log.w("Init ", "``````````````````````````````````````````````````````````");
+
+                    Log.w("after init", "``````````````````````````````````````````````````````````");
+                    if( loader == null )
+                        loader = loaderManager.initLoader(
+                                0, null, MainActivity.this
+                        );
+                    else if( loader.isAbandoned() )
+                        return;
+                    else
+                        loaderManager.restartLoader(
+                                0, null, MainActivity.this
+                        );
                 } else {
                     // Otherwise, display error
                     // First, hide loading indicator so error message will be visible
@@ -89,10 +107,8 @@ public class MainActivity extends AppCompatActivity
                     mEmptyStateTextView.setText(R.string.no_internet_connection);
                 }
 
-                    restartLoading();
-
-
-
+            }
+        });
 
 
         /*
@@ -118,8 +134,8 @@ public class MainActivity extends AppCompatActivity
     called when a loader is created
      */
     @Override
-    public Loader<List<Book>> onCreateLoader(int id, Bundle args) {
-        Log.e("ON CREATE LOADER", "LOG ");
+    public Loader<ArrayList<Book>> onCreateLoader(int id, Bundle args) {
+        Log.w("OnCreateLoader", "``````````````````````````````````````````````````````````");
         mProgressBar.setVisibility(View.VISIBLE);
         //Creates the string for URL according to the values provided by the user
         String requestURL = BASE_URL + "q=" + searchValue.getText().toString() + "&maxResults=" + MAX_NUMBER_OF_RESULTS;
@@ -134,15 +150,18 @@ public class MainActivity extends AppCompatActivity
          */
 
     @Override
-    public void onLoadFinished(Loader<List<Book>> loader, List<Book> data) {
-        Log.e("ON FINISH LOADER", "LOG ");
+    public void onLoadFinished(Loader<ArrayList<Book>> loader, ArrayList<Book> data) {
+        Log.w("Onfinished", "``````````````````````````````````````````````````````````");
         mProgressBar.setVisibility(View.GONE);
-        mEmptyStateTextView.setText(R.string.no_earthquakes);
+        mEmptyStateTextView.setText(R.string.no_books);
         // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         mAdapter.clear();
         if (data != null && !data.isEmpty()) {
+
             mAdapter.addAll(data);
+            Log.w("Added Data", "``````````````````````````````````````````````````````````");
+
         }
 
 
@@ -152,17 +171,24 @@ public class MainActivity extends AppCompatActivity
 
 
     @Override
-    public void onLoaderReset(Loader<List<Book>> data) {
-        Log.e("ON RESET LOADER", "LOG ");
+    public void onLoaderReset(Loader<ArrayList<Book>> data) {
         mAdapter.clear();
+        Log.w("ResetLoader", "``````````````````````````````````````````````````````````");
 
     }
 
     protected void restartLoading() {
         //Incase the screen is rotated
         mAdapter.clear();
-
+        getLoaderManager().restartLoader(0, null, MainActivity.this);
 
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        // Save our own state now
+        outState.putInt(STATE_COUNTER, mCounter);
+
+    }
 }

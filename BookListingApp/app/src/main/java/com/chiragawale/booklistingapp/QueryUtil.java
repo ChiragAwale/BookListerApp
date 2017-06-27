@@ -28,8 +28,8 @@ public class QueryUtil {
     /*
     Returns the Refined data collected from the server
      */
-    public static List<Book> getBookData(String request_url) {
-        Log.i("Fetech Earthquake data", "LOG ");
+    public static ArrayList<Book> getBookData(String request_url) {
+        Log.w("Get book data", "``````````````````````````````````````````````````````````");
 
         URL url = createUrl(request_url);
         String result = "";
@@ -39,7 +39,7 @@ public class QueryUtil {
             Log.e(LOG_TAG,"IO Exception");
         }
 
-        List<Book> bookList = getBookList(result);
+        ArrayList<Book> bookList = getBookList(result);
         return bookList;
     }
 
@@ -121,8 +121,8 @@ public class QueryUtil {
 
     }
     //Returns the list of books after extracting data from the JSON response
-    public static List<Book> getBookList(String jsonResponse){
-        List<Book> bookList = new ArrayList<>();
+    public static ArrayList<Book> getBookList(String jsonResponse){
+        ArrayList<Book> bookList = new ArrayList<>();
         double price = 0;
         String currency = "";
         double averageRating = 0;
