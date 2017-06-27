@@ -29,6 +29,7 @@ public class QueryUtil {
     Returns the Refined data collected from the server
      */
     public static List<Book> getBookData(String request_url) {
+        Log.i("Fetech Earthquake data", "LOG ");
 
         URL url = createUrl(request_url);
         String result = "";

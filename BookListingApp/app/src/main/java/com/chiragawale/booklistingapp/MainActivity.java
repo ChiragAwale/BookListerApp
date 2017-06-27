@@ -33,13 +33,14 @@ public class MainActivity extends AppCompatActivity
     private TextView mEmptyStateTextView;
     private ProgressBar mProgressBar;
     private BookAdapter mAdapter;
-    private android.app.LoaderManager loaderManager;
-    private boolean mFirst = true;      //For determining the usage of loaders
+
+    // boolean mFirst = true;      //For determining the usage of loaders
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.i("ON CREATE", "LOG ");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        mFirst = true;
+
         /*
         Linking the Views to local variables
          */
@@ -59,9 +60,7 @@ public class MainActivity extends AppCompatActivity
         /*
         Setting action for search button
          */
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+
                 // Get a reference to the ConnectivityManager to check state of network connectivity
                 ConnectivityManager connMgr = (ConnectivityManager)
                         getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -71,12 +70,14 @@ public class MainActivity extends AppCompatActivity
 
                 // If there is a network connection, fetch data
                 if (networkInfo != null && networkInfo.isConnected()) {
+
                     // Get a reference to the LoaderManager, in order to interact with loaders.
-                     loaderManager = getLoaderManager();
+                     android.app.LoaderManager loaderManager = getLoaderManager();
 
                     // Initialize the loader. Pass in the int ID constant defined above and pass in null for
                     // the bundle. Pass in this activity for the LoaderCallbacks parameter (which is valid
                     // because this activity implements the LoaderCallbacks interface).
+                    Log.e("init loader calling ", "LOG ");
                     loaderManager.initLoader(1, null, MainActivity.this);
                 } else {
                     // Otherwise, display error
@@ -88,11 +89,10 @@ public class MainActivity extends AppCompatActivity
                     mEmptyStateTextView.setText(R.string.no_internet_connection);
                 }
 
-                if(!mFirst){
                     restartLoading();
-                }
-            }
-        });
+
+
+
 
 
         /*
@@ -119,6 +119,7 @@ public class MainActivity extends AppCompatActivity
      */
     @Override
     public Loader<List<Book>> onCreateLoader(int id, Bundle args) {
+        Log.e("ON CREATE LOADER", "LOG ");
         mProgressBar.setVisibility(View.VISIBLE);
         //Creates the string for URL according to the values provided by the user
         String requestURL = BASE_URL + "q=" + searchValue.getText().toString() + "&maxResults=" + MAX_NUMBER_OF_RESULTS;
@@ -134,16 +135,16 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> data) {
+        Log.e("ON FINISH LOADER", "LOG ");
         mProgressBar.setVisibility(View.GONE);
         mEmptyStateTextView.setText(R.string.no_earthquakes);
         // If there is a valid list of {@link Earthquake}s, then add them to the adapter's
         // data set. This will trigger the ListView to update.
         mAdapter.clear();
         if (data != null && !data.isEmpty()) {
-
             mAdapter.addAll(data);
         }
-        mFirst = false;
+
 
     }
 
@@ -152,14 +153,15 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoaderReset(Loader<List<Book>> data) {
+        Log.e("ON RESET LOADER", "LOG ");
         mAdapter.clear();
-        mFirst= true;
+
     }
 
     protected void restartLoading() {
         //Incase the screen is rotated
         mAdapter.clear();
-        getLoaderManager().restartLoader(1, null, this);
+
 
     }
 
