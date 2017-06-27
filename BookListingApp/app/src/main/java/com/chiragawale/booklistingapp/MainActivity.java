@@ -37,12 +37,17 @@ public class MainActivity extends AppCompatActivity
 
     private static final String STATE_COUNTER = "counter";
 
-    private int mCounter;
+    private ArrayList<Book> mList = null;
 
     Loader loader = null;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         Log.w("OnCreate", "``````````````````````````````````````````````````````````");
+
+
+        if (savedInstanceState != null) {
+            mList = (ArrayList) savedInstanceState.getSerializable(STATE_COUNTER);
+        }
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -56,6 +61,9 @@ public class MainActivity extends AppCompatActivity
 
 
         ArrayList<Book> bookList = new ArrayList<>();
+        if(mList!=null){
+            bookList = mList;
+        }
         mAdapter = new BookAdapter(this, bookList);
         ListView listView = (ListView) findViewById(R.id.list);
         listView.setAdapter(mAdapter);
@@ -151,6 +159,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<ArrayList<Book>> loader, ArrayList<Book> data) {
+        mList = data;
         Log.w("Onfinished", "``````````````````````````````````````````````````````````");
         mProgressBar.setVisibility(View.GONE);
         mEmptyStateTextView.setText(R.string.no_books);
@@ -188,7 +197,7 @@ public class MainActivity extends AppCompatActivity
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         // Save our own state now
-        outState.putInt(STATE_COUNTER, mCounter);
+        outState.putSerializable(STATE_COUNTER, mList);
 
     }
 }
